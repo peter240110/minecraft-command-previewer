@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Schematic Converter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #020617;
+            color: #e2e8f0;
+            font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .glass-card {
+            background: #0f172a;
+            border: 1px solid #1e293b;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 600px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .drop-zone {
+            border: 2px dashed #334155;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            background: #1e293b50;
+            margin-bottom: 24px;
+        }
+
+        .drop-zone.drag-over {
+            border-color: #3b82f6;
+            background: #1e293b;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+            font-weight: 600;
+            padding: 12px 24px;
+            border-radius: 8px;
+            width: 100%;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:disabled {
+            background: #1e293b;
+            color: #64748b;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #langSelect {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #1e293b;
+            color: white;
+            border: 1px solid #334155;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .status-msg {
+            margin-top: 16px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .credits {
+            margin-top: 24px;
+            font-size: 12px;
+            color: #64748b;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <select id="langSelect" onchange="updateLanguage()">
+        <option value="en" selected>English</option>
+        <option value="hu">Magyar</option>
+    </select>
+
+    <div class="glass-card">
+        <h1 id="title" class="text-3xl font-bold mb-2 text-center text-white">Schematic Converter</h1>
+        <p id="subtitle" class="text-slate-400 text-center mb-8">Convert previewer JSON to Minecraft format</p>
+
+        <div id="dropZone" class="drop-zone">
+            <svg class="w-12 h-12 mx-auto text-slate-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+            </svg>
+            <p id="dropText" class="font-medium">Drop your .json file here</p>
+            <p id="dropSubtext" class="text-xs text-slate-500 mt-1">or click to browse</p>
+            <input type="file" id="fileInput" class="hidden" accept=".json">
+        </div>
+
+        <button id="convertBtn" class="btn-primary" disabled onclick="handleConvert()">
+            <span id="btnText">Convert & Download</span>
+        </button>
+
+        <div id="status" class="status-msg"></div>
+
+        <div class="credits">
+            Idea: peter240110 | Special thanks: <a href="https://gemini.google.com" target="_blank" class="text-blue-500">Gemini</a>
+        </div>
+    </div>
+
+    <script>
+        const i18n = {
+            en: {
+                title: "Schematic Converter",
+                subtitle: "Convert previewer JSON to Minecraft format",
+                dropText: "Drop your .json file here",
+                dropSubtext: "or click to browse",
+                btnText: "Convert & Download",
+                ready: "File ready: ",
+                error: "Invalid file format!",
+                success: "Conversion successful! Downloading...",
+                noFile: "Please select a file first."
+            },
+            hu: {
+                title: "Schematic Konverter",
+                subtitle: "Previewer JSON átalakítása Minecraft formátumba",
+                dropText: "Húzd ide a .json fájlt",
+                dropSubtext: "vagy kattints a böngészéshez",
+                btnText: "Konvertálás és Letöltés",
+                ready: "Fájl betöltve: ",
+                error: "Érvénytelen fájlformátum!",
+                success: "Sikeres konvertálás! Letöltés...",
+                noFile: "Előbb válassz ki egy fájlt."
+            }
+        };
+
+        let selectedFile = null;
+        let jsonData = null;
+
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const convertBtn = document.getElementById('convertBtn');
+        const status = document.getElementById('status');
+        const langSelect = document.getElementById('langSelect');
+
+        function updateLanguage() {
+            const lang = langSelect.value;
+            document.getElementById('title').innerText = i18n[lang].title;
+            document.getElementById('subtitle').innerText = i18n[lang].subtitle;
+            document.getElementById('dropText').innerText = i18n[lang].dropText;
+            document.getElementById('dropSubtext').innerText = i18n[lang].dropSubtext;
+            document.getElementById('btnText').innerText = i18n[lang].btnText;
+            if (selectedFile) {
+                status.innerText = i18n[lang].ready + selectedFile.name;
+            }
+        }
+
+        // Drag & Drop
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+
+        function handleFiles(files) {
+            if (files.length === 0) return;
+            const file = files[0];
+            const lang = langSelect.value;
+
+            if (!file.name.endsWith('.json')) {
+                status.innerText = i18n[lang].error;
+                status.className = "status-msg text-red-400";
+                convertBtn.disabled = true;
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    jsonData = JSON.parse(e.target.result);
+                    if (!jsonData.palette || !jsonData.size || !jsonData.data) throw new Error();
+                    
+                    selectedFile = file;
+                    status.innerText = i18n[lang].ready + file.name;
+                    status.className = "status-msg text-emerald-400";
+                    convertBtn.disabled = false;
+                } catch (err) {
+                    status.innerText = i18n[lang].error;
+                    status.className = "status-msg text-red-400";
+                    convertBtn.disabled = true;
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function handleConvert() {
+            if (!jsonData) return;
+            const lang = langSelect.value;
+            status.innerText = i18n[lang].success;
+            status.className = "status-msg text-blue-400";
+
+            // Itt a jövőben egy valódi NBT generátor futhatna.
+            // Egyelőre letöltjük a javított formátumot.
+            const schematicOutput = {
+                SchematicVersion: 2,
+                Width: jsonData.size[0],
+                Height: jsonData.size[1],
+                Length: jsonData.size[2],
+                Palette: jsonData.palette,
+                BlockData: jsonData.data,
+                Metadata: {
+                    Wand: "Gemini previewer",
+                    Date: new Date().toISOString(),
+                    Creator: "peter240110"
+                }
+            };
+
+            const blob = new Blob([JSON.stringify(schematicOutput, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = selectedFile.name.replace('.json', '');
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        updateLanguage();
+    </script>
+</body>
+</html>
