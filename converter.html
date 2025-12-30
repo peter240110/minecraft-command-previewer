@@ -70,6 +70,17 @@
             transform: none;
         }
 
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 20px;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: #3b82f6; }
+
         #langSelect {
             position: absolute;
             top: 20px;
@@ -104,6 +115,12 @@
     </select>
 
     <div class="glass-card">
+        <!-- Vissza a főoldalra link - GitHubon index.html lesz a neve -->
+        <a href="index.html" class="back-link">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            <span id="backText">Back to Previewer</span>
+        </a>
+
         <h1 id="title" class="text-3xl font-bold mb-2 text-center text-white">Schematic Converter</h1>
         <p id="subtitle" class="text-slate-400 text-center mb-8">Convert previewer JSON to Minecraft format</p>
 
@@ -123,7 +140,7 @@
         <div id="status" class="status-msg"></div>
 
         <div class="credits">
-            Idea: peter240110 | Special thanks: <a href="https://gemini.google.com" target="_blank" class="text-blue-500">Gemini</a>
+            Idea: <a href="https://github.com/peter240110" target="_blank" class="text-slate-300 hover:text-blue-400">peter240110</a> | Special thanks: <a href="https://gemini.google.com" target="_blank" class="text-blue-500">Gemini</a>
         </div>
     </div>
 
@@ -135,6 +152,7 @@
                 dropText: "Drop your .json file here",
                 dropSubtext: "or click to browse",
                 btnText: "Convert & Download",
+                backText: "Back to Previewer",
                 ready: "File ready: ",
                 error: "Invalid file format!",
                 success: "Conversion successful! Downloading...",
@@ -146,6 +164,7 @@
                 dropText: "Húzd ide a .json fájlt",
                 dropSubtext: "vagy kattints a böngészéshez",
                 btnText: "Konvertálás és Letöltés",
+                backText: "Vissza a Previewerhez",
                 ready: "Fájl betöltve: ",
                 error: "Érvénytelen fájlformátum!",
                 success: "Sikeres konvertálás! Letöltés...",
@@ -169,12 +188,12 @@
             document.getElementById('dropText').innerText = i18n[lang].dropText;
             document.getElementById('dropSubtext').innerText = i18n[lang].dropSubtext;
             document.getElementById('btnText').innerText = i18n[lang].btnText;
+            document.getElementById('backText').innerText = i18n[lang].backText;
             if (selectedFile) {
                 status.innerText = i18n[lang].ready + selectedFile.name;
             }
         }
 
-        // Drag & Drop
         dropZone.addEventListener('click', () => fileInput.click());
         dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
@@ -226,8 +245,6 @@
             status.innerText = i18n[lang].success;
             status.className = "status-msg text-blue-400";
 
-            // Itt a jövőben egy valódi NBT generátor futhatna.
-            // Egyelőre letöltjük a javított formátumot.
             const schematicOutput = {
                 SchematicVersion: 2,
                 Width: jsonData.size[0],
