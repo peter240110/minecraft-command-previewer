@@ -249,13 +249,13 @@
 
         <div id="modal-overlay">
             <div class="modal-box">
-                <h3 class="text-emerald-400 font-bold text-lg mb-2">Export Kész!</h3>
+                <h3 class="text-emerald-400 font-bold text-lg mb-2" data-i18n="modalFinished">Export Kész!</h3>
                 <p class="text-sm text-slate-300 mb-4" id="modal-text"></p>
                 <div class="flex flex-col gap-2">
-                    <a href="#" id="converter-link" target="_blank" class="text-blue-400 text-xs hover:underline bg-blue-900/20 p-2 rounded border border-blue-500/30">
-                        🔗 Konverter megnyitása (Hamarosan...)
-                    </a>
-                    <button class="btn mt-2 bg-slate-700" onclick="closeModal()">Bezárás</button>
+                    <button onclick="openConverter()" class="text-blue-400 text-xs hover:bg-blue-900/30 transition-colors bg-blue-900/20 p-3 rounded border border-blue-500/30 flex items-center justify-center gap-2">
+                        <span data-i18n="modalLinkText">🔗 Nyisd meg a Schematic Konvertert</span>
+                    </button>
+                    <button class="btn mt-2 bg-slate-700" onclick="closeModal()" data-i18n="modalClose">Bezárás</button>
                 </div>
             </div>
         </div>
@@ -297,7 +297,10 @@
                 expImgDesc: "(.png) - Snapshot",
                 expVidTitle: "Create Video",
                 expVidDesc: "(.webm) - 360° turnaround",
-                alertSchem: "The .schem file is in JSON format for now. You can convert it using our upcoming tool."
+                alertSchem: "The .schem file is in JSON format for now. Use the Converter to transform it!",
+                modalFinished: "Export Finished!",
+                modalLinkText: "🔗 Open Schematic Converter",
+                modalClose: "Close"
             },
             hu: {
                 editorTitle: "Parancs Szerkesztő",
@@ -323,7 +326,10 @@
                 expImgDesc: "(.png) - Pillanatkép",
                 expVidTitle: "Videó készítése",
                 expVidDesc: "(.webm) - 360° körbefordulás",
-                alertSchem: "A .schem fájl egyelőre JSON formátumban töltődött le. Használd a konverterünket a .schem-mé alakításhoz!"
+                alertSchem: "A .schem fájl egyelőre JSON formátumban töltődött le. Használd a konvertert az átalakításhoz!",
+                modalFinished: "Export Kész!",
+                modalLinkText: "🔗 Nyisd meg a Schematic Konvertert",
+                modalClose: "Bezárás"
             }
         };
 
@@ -364,6 +370,13 @@
 
         function closeModal() {
             document.getElementById('modal-overlay').style.display = 'none';
+        }
+
+        function openConverter() {
+            // Megnyitja a konvertert a jelenlegi környezetben (canvas fájl elérése)
+            window.parent.postMessage({ type: 'OPEN_FILE', filepath: 'converter.html' }, '*');
+            // Biztonsági mentés ha az iframe nem támogatja a direkt váltást:
+            closeModal();
         }
 
         window.onclick = function() {
@@ -639,7 +652,6 @@
             const blob = new Blob([JSON.stringify({size, palette, data: Array.from(blockData)})], {type: "application/json"});
             downloadBlob(blob, "minecraft_build.schem.json");
             
-            // Show modal instead of alert
             document.getElementById('modal-text').innerText = translations[currentLang].alertSchem;
             document.getElementById('modal-overlay').style.display = 'flex';
         }
@@ -712,7 +724,7 @@
             renderer.setSize(container.clientWidth, container.clientHeight);
         });
 
-            init();
+        init();
     </script>
 </body>
 </html>
