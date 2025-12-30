@@ -86,6 +86,7 @@
             z-index: 1000;
         }
 
+        /* Modal for schematic info */
         #modal-overlay {
             position: fixed;
             inset: 0;
@@ -104,6 +105,7 @@
             text-align: center;
         }
 
+        /* Export Menu Styles */
         .export-container {
             position: absolute;
             top: 20px;
@@ -172,36 +174,37 @@
         <div class="flex justify-between items-center mb-1">
             <h2 class="text-xl font-bold" data-i18n="editorTitle">Command Editor</h2>
             <select id="langSelect" onchange="changeLanguage(this.value)">
-                <option value="en" selected>English</option>
-                <option value="hu">Magyar</option>
+                <option value="en">English</option>
+                <option value="hu" selected>Magyar</option>
             </select>
         </div>
 
+        <!-- CREDITS SECTION -->
         <div class="text-[10px] text-slate-500 mb-2 flex flex-col gap-0.5 border-b border-slate-800 pb-2">
-            <div>Idea: <a href="https://github.com/peter240110" target="_blank" class="text-slate-300 hover:text-blue-400 hover:underline">peter240110</a></div>
+            <div>Idea: <span class="text-slate-300">peter240110</span></div>
             <div>Special thanks: <a href="https://gemini.google.com" target="_blank" class="text-blue-500 hover:underline">Gemini</a></div>
         </div>
 
-        <p class="text-[10px] text-slate-400 mb-2" data-i18n="exampleText">Examples: /setblock, /fill, /clone x1 y1 z1 x2 y2 z2 dx dy dz [mode]</p>
+        <p class="text-[10px] text-slate-400 mb-2" data-i18n="exampleText">Példák: /setblock, /fill, /clone x1 y1 z1 x2 y2 z2 dx dy dz [mód]</p>
         <textarea id="commandEditor" class="editor-area" spellcheck="false">/fill 0 0 0 1 1 1 minecraft:redstone_block
 /fill 0 2 0 1 2 1 minecraft:glass
 /clone 0 0 0 1 2 1 3 0 0 masked</textarea>
         
         <div class="slider-container mt-4 bg-slate-800/50 p-3 rounded-lg border border-slate-700">
             <div class="flex justify-between text-xs mb-1">
-                <span><span data-i18n="gridSizeLabel">Grid Size</span>: <span id="gridVal">21</span>x21</span>
+                <span><span data-i18n="gridSizeLabel">Rácsméret</span>: <span id="gridVal">21</span>x21</span>
             </div>
             <input type="range" id="gridSlider" min="21" max="101" step="2" value="21" class="w-full cursor-pointer" oninput="updateGridSize(this.value)">
         </div>
 
         <div class="mt-4 flex flex-col gap-2">
-            <button class="btn btn-run py-3" onclick="parseAndRunCommands()" data-i18n="runBtn">Run Commands</button>
-            <button class="btn bg-red-900/30 border-red-500/50 hover:bg-red-800" onclick="clearAllBlocks()" data-i18n="clearBtn">Clear All</button>
+            <button class="btn btn-run py-3" onclick="parseAndRunCommands()" data-i18n="runBtn">Parancsok futtatása</button>
+            <button class="btn bg-red-900/30 border-red-500/50 hover:bg-red-800" onclick="clearAllBlocks()" data-i18n="clearBtn">Összes törlése</button>
         </div>
         
         <div class="mt-4 p-3 bg-slate-800/50 rounded-lg border border-slate-700">
             <div class="flex items-center justify-between cursor-pointer" onclick="toggleBlockList()">
-                <h3 class="text-sm font-bold text-blue-400" data-i18n="availableBlocksTitle">Available Blocks</h3>
+                <h3 class="text-sm font-bold text-blue-400" data-i18n="availableBlocksTitle">Használható blokkok</h3>
                 <svg id="listArrow" class="arrow-icon w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
             </div>
             <div id="blockListWrapper" class="content-hidden mt-2">
@@ -222,37 +225,37 @@
             <div id="exportMenu" class="export-menu">
                 <div class="export-item" onclick="exportSchematic()">
                     <span class="font-bold text-sm text-emerald-400" data-i18n="expSchemTitle">Minecraft Schematic</span>
-                    <span data-i18n="expSchemDesc">(.schem) - Ready for import</span>
+                    <span data-i18n="expSchemDesc">(.schem) - Világba tölthető</span>
                 </div>
                 <div class="export-item" onclick="exportGLB()">
-                    <span class="font-bold text-sm text-blue-400" data-i18n="expModelTitle">3D Model</span>
+                    <span class="font-bold text-sm text-blue-400" data-i18n="expModelTitle">3D Modell</span>
                     <span data-i18n="expModelDesc">(.glb) - Blender / Preview</span>
                 </div>
                 <div class="export-item" onclick="takeScreenshot()">
-                    <span class="font-bold text-sm text-purple-400" data-i18n="expImgTitle">Save Image</span>
-                    <span data-i18n="expImgDesc">(.png) - Snapshot</span>
+                    <span class="font-bold text-sm text-purple-400" data-i18n="expImgTitle">Kép mentése</span>
+                    <span data-i18n="expImgDesc">(.png) - Pillanatkép</span>
                 </div>
                 <div class="export-item" onclick="recordVideo()">
-                    <span class="font-bold text-sm text-red-400" data-i18n="expVidTitle">Create Video</span>
-                    <span data-i18n="expVidDesc">(.webm) - 360° turnaround</span>
+                    <span class="font-bold text-sm text-red-400" data-i18n="expVidTitle">Videó készítése</span>
+                    <span data-i18n="expVidDesc">(.webm) - 360° körbefordulás</span>
                 </div>
             </div>
         </div>
 
         <div id="loading-screen">
-            <div class="text-xl font-bold mb-2" id="loading-title" data-i18n="loadingText">Building blocks...</div>
+            <div class="text-xl font-bold mb-2" id="loading-title" data-i18n="loadingText">Blokkok építése...</div>
             <div id="loading-progress" class="text-sm text-slate-400">0 / 0</div>
         </div>
 
         <div id="modal-overlay">
             <div class="modal-box">
-                <h3 class="text-emerald-400 font-bold text-lg mb-2">Export Ready!</h3>
+                <h3 class="text-emerald-400 font-bold text-lg mb-2">Export Kész!</h3>
                 <p class="text-sm text-slate-300 mb-4" id="modal-text"></p>
                 <div class="flex flex-col gap-2">
-                    <a href="converter.html" id="converter-link" target="_blank" class="text-blue-400 text-xs hover:underline bg-blue-900/20 p-2 rounded border border-blue-500/30">
-                        🔗 Open Converter (Schematic Fixer)
+                    <a href="#" id="converter-link" target="_blank" class="text-blue-400 text-xs hover:underline bg-blue-900/20 p-2 rounded border border-blue-500/30">
+                        🔗 Konverter megnyitása (Hamarosan...)
                     </a>
-                    <button class="btn mt-2 bg-slate-700" onclick="closeModal()">Close</button>
+                    <button class="btn mt-2 bg-slate-700" onclick="closeModal()">Bezárás</button>
                 </div>
             </div>
         </div>
@@ -260,11 +263,11 @@
         <div id="container" tabindex="0"></div>
 
         <div class="bottom-controls">
-            <button class="btn" onclick="adjustZoom(-2)" data-i18n="zoomInBtn">Zoom In (+)</button>
-            <button class="btn" onclick="adjustZoom(2)" data-i18n="zoomOutBtn">Zoom Out (-)</button>
-            <button class="btn" onclick="toggleAutoRotate()" id="rotateBtn" data-i18n="startRotateBtn">Start Rotation</button>
-            <button class="btn bg-indigo-600 border-indigo-400" onclick="cycleCoordMode()" id="modeBtn">Coord Mode: Axes</button>
-            <button class="btn" onclick="resetCamera()" data-i18n="resetBtn">Reset</button>
+            <button class="btn" onclick="adjustZoom(-2)" data-i18n="zoomInBtn">Közelítés (+)</button>
+            <button class="btn" onclick="adjustZoom(2)" data-i18n="zoomOutBtn">Távolítás (-)</button>
+            <button class="btn" onclick="toggleAutoRotate()" id="rotateBtn" data-i18n="startRotateBtn">Forgatás</button>
+            <button class="btn bg-indigo-600 border-indigo-400" onclick="cycleCoordMode()" id="modeBtn">Koordináta mód: Tengelyek</button>
+            <button class="btn" onclick="resetCamera()" data-i18n="resetBtn">Alaphelyzet</button>
         </div>
     </div>
 
@@ -272,7 +275,7 @@
         const translations = {
             en: {
                 editorTitle: "Command Editor",
-                exampleText: "Examples: /setblock, /fill, /clone x1 y1 z1 x2 y2 z2 dx dy dz [mode]",
+                exampleText: "Examples: /setblock, /fill, /clone x1 y1 z1 x2 y2 z2 dx dy dz [mask]",
                 gridSizeLabel: "Grid Size",
                 runBtn: "Run Commands",
                 clearBtn: "Clear All",
@@ -294,7 +297,7 @@
                 expImgDesc: "(.png) - Snapshot",
                 expVidTitle: "Create Video",
                 expVidDesc: "(.webm) - 360° turnaround",
-                alertSchem: "The .schem file is in JSON format for now. You can convert it using our tool!"
+                alertSchem: "The .schem file is in JSON format for now. You can convert it using our upcoming tool."
             },
             hu: {
                 editorTitle: "Parancs Szerkesztő",
@@ -324,7 +327,7 @@
             }
         };
 
-        let currentLang = 'en';
+        let currentLang = 'hu';
         let scene, camera, renderer;
         let isAutoRotating = false;
         let zoomDistance = 25;
@@ -420,7 +423,7 @@
             });
 
             setupControls();
-            changeLanguage('en');
+            changeLanguage('hu');
             animate();
             setTimeout(parseAndRunCommands, 500);
         }
@@ -634,8 +637,9 @@
             }
             
             const blob = new Blob([JSON.stringify({size, palette, data: Array.from(blockData)})], {type: "application/json"});
-            downloadBlob(blob, "minecraft_build.json");
+            downloadBlob(blob, "minecraft_build.schem.json");
             
+            // Show modal instead of alert
             document.getElementById('modal-text').innerText = translations[currentLang].alertSchem;
             document.getElementById('modal-overlay').style.display = 'flex';
         }
